@@ -1,0 +1,381 @@
+/* Estilo Arcade Retro */
+:root {
+  --neon-pink: #ff2a6d;
+  --neon-blue: #05d9e8;
+  --neon-purple: #d300c5;
+  --neon-green: #00ff87;
+  --dark-bg: #0d0221;
+  --glow: 0 0 10px;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: var(--neon-blue);
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.6;
+  margin: 0;
+  padding: 20px;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(255, 42, 109, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(5, 217, 232, 0.1) 0%, transparent 20%);
+}
+
+/* Fuente pixelada */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Contenedor principal */
+#game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  border: 4px solid var(--neon-pink);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 
+    0 0 15px var(--neon-pink),
+    0 0 30px var(--neon-purple);
+  background-color: rgba(13, 2, 33, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+#game-container::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(
+    45deg,
+    var(--neon-pink),
+    var(--neon-blue),
+    var(--neon-purple),
+    var(--neon-green)
+  );
+  z-index: -1;
+  filter: blur(20px);
+  opacity: 0.5;
+}
+
+/* Títulos */
+h1, h2, h3 {
+  color: var(--neon-green);
+  text-shadow: 
+    var(--glow) var(--neon-green),
+    0 0 20px var(--neon-green);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Botones */
+button {
+  background-color: transparent;
+  color: var(--neon-blue);
+  border: 2px solid var(--neon-blue);
+  padding: 12px 24px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  box-shadow: 
+    var(--glow) var(--neon-blue),
+    inset var(--glow) var(--neon-blue);
+}
+
+button:hover {
+  color: var(--neon-pink);
+  border-color: var(--neon-pink);
+  box-shadow: 
+    var(--glow) var(--neon-pink),
+    inset var(--glow) var(--neon-pink),
+    0 0 30px var(--neon-pink);
+  transform: translateY(-3px);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Inputs */
+input, textarea, select {
+  background-color: rgba(5, 217, 232, 0.1);
+  border: 2px solid var(--neon-blue);
+  color: var(--neon-green);
+  padding: 10px;
+  font-family: 'Press Start 2P', cursive;
+  width: 100%;
+  margin-bottom: 20px;
+  box-shadow: 
+    inset 0 0 5px var(--neon-blue),
+    0 0 10px var(--neon-blue);
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--neon-pink);
+  box-shadow: 
+    inset 0 0 10px var(--neon-pink),
+    0 0 20px var(--neon-pink);
+}
+
+/* Chat */
+#chat-container {
+  border: 2px solid var(--neon-purple);
+  background-color: rgba(13, 2, 33, 0.7);
+  box-shadow: 
+    0 0 10px var(--neon-purple),
+    inset 0 0 10px var(--neon-purple);
+}
+
+#chat-messages {
+  color: var(--neon-green);
+  font-size: 12px;
+}
+
+/* Efecto de escaneo (scanlines) */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(
+      rgba(5, 217, 232, 0.1) 1px, 
+      transparent 1px
+    );
+  background-size: 100% 2px;
+  pointer-events: none;
+  z-index: 1000;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+  from { background-position: 0 0; }
+  to { background-position: 0 100%; }
+}
+
+/* Efecto parpadeante para texto importante */
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Pantallas ocultas */
+.hidden {
+  display: none;
+}
+/* public/style.css - Continuación */
+
+/* Pantalla de jugador */
+.player-screen {
+  background: radial-gradient(
+    circle at center,
+    rgba(5, 217, 232, 0.1) 0%,
+    rgba(13, 2, 33, 1) 70%
+  );
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+/* Texto con huecos */
+.hidden-text {
+  font-size: 24px;
+  line-height: 1.8;
+  margin: 30px 0;
+  padding: 20px;
+  background-color: rgba(0, 255, 135, 0.05);
+  border-left: 3px solid var(--neon-green);
+  border-right: 3px solid var(--neon-green);
+}
+
+.hidden-text span {
+  color: var(--neon-pink);
+  text-decoration: underline;
+}
+
+/* Puntuación */
+.score-display {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: rgba(255, 42, 109, 0.1);
+  border-top: 2px solid var(--neon-pink);
+  border-bottom: 2px solid var(--neon-pink);
+}
+
+.player-score {
+  text-align: center;
+}
+
+.player-score .name {
+  color: var(--neon-blue);
+  font-size: 14px;
+}
+
+.player-score .points {
+  color: var(--neon-green);
+  font-size: 24px;
+  text-shadow: 0 0 10px var(--neon-green);
+}
+
+/* Temporizador */
+.timer {
+  text-align: center;
+  font-size: 24px;
+  color: var(--neon-purple);
+  margin: 20px 0;
+  text-shadow: 0 0 10px var(--neon-purple);
+}
+
+/* Efecto de glitch en hover */
+.glitch-effect {
+  position: relative;
+}
+
+.glitch-effect:hover {
+  text-shadow: 
+    2px 0 var(--neon-pink),
+    -2px 0 var(--neon-blue);
+  animation: glitch 0.3s linear infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+/* Estilos adicionales para los nuevos elementos */
+
+.glow-button {
+    background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+    color: var(--dark-bg);
+    font-weight: bold;
+    border: none;
+    padding: 15px 30px;
+    margin: 20px 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 
+        0 0 10px var(--neon-blue),
+        0 0 20px var(--neon-pink);
+    transition: all 0.3s;
+}
+
+.glow-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+        0 0 15px var(--neon-blue),
+        0 0 30px var(--neon-pink);
+}
+
+.small-button {
+    padding: 8px 15px;
+    font-size: 12px;
+}
+
+.arcade-input, .arcade-select, .arcade-textarea {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--neon-purple);
+    color: var(--neon-green);
+    font-family: 'Press Start 2P', cursive;
+    padding: 12px;
+    margin: 10px 0;
+    width: 100%;
+    box-shadow: 
+        inset 0 0 5px var(--neon-purple),
+        0 0 10px var(--neon-purple);
+}
+
+.arcade-textarea {
+    min-height: 100px;
+    resize: none;
+}
+
+.arcade-chat {
+    border: 3px solid var(--neon-green);
+    padding: 15px;
+    margin-top: 30px;
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 
+        0 0 15px var(--neon-green),
+        inset 0 0 15px var(--neon-green);
+}
+
+.arcade-text {
+    background-color: rgba(5, 217, 232, 0.1);
+    padding: 15px;
+    margin: 15px 0;
+    border-left: 3px solid var(--neon-blue);
+    border-right: 3px solid var(--neon-blue);
+}
+
+.accuracy {
+    font-size: 24px;
+    color: var(--neon-pink);
+    text-shadow: 0 0 10px var(--neon-pink);
+    margin: 20px 0;
+}
+
+/* Efecto de máquina de escribir */
+.typewriter {
+    border-right: 3px solid var(--neon-blue);
+    animation: blink-caret 0.75s step-end infinite;
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--neon-blue); }
+}
+    .game-id-container {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border: 2px solid var(--neon-blue);
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .game-id-box {
+        font-size: 24px;
+        letter-spacing: 3px;
+        color: var(--neon-green);
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(0, 255, 135, 0.1);
+        border: 1px dashed var(--neon-green);
+    }
+
+    #qr-code {
+        margin: 20px auto;
+        width: 150px;
+        height: 150px;
+        background: white;
+        padding: 10px;
+    }
+    .join-instructions {
+        margin-bottom: 20px;
+        color: var(--neon-blue);
+    }
+
+    .camera-container {
+        width: 100%;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.5);
+        margin: 10px 0;
+        border: 2px dashed var(--neon-purple);
+        display: none;
+    }

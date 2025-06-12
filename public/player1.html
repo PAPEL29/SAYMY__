@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Player 1 - Text Master</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <div class="score-display">
+            <div class="player-score">
+                <div class="name">PLAYER 1</div>
+                <div class="points" id="player1-score">0</div>
+            </div>
+            <div class="player-score">
+                <div class="name">PLAYER 2</div>
+                <div class="points" id="player2-score">0</div>
+            </div>
+        </div>
+
+        <div id="waiting-screen" class="hidden">
+    <h2 class="blink">WAITING FOR PLAYER 2</h2>
+    <div class="game-id-container">
+        <p>SHARE THIS GAME ID:</p>
+        <div class="game-id-box" id="game-id-display"></div>
+        <button id="copy-id-btn" class="small-button">COPY ID</button>
+    </div>
+    <div class="qr-code-container" id="qr-code"></div>
+    <p id="connection-status">No players connected yet</p>
+</div>
+        
+        <div id="text-selection" class="hidden">
+            <h2>SELECT YOUR TEXT:</h2>
+            <select id="text-options" class="arcade-select">
+                <option value="The quick brown fox jumps over the lazy dog">The quick brown fox jumps over the lazy dog</option>
+                <option value="To be or not to be that is the question">To be or not to be that is the question</option>
+                <option value="May the Force be with you">May the Force be with you</option>
+            </select>
+            <button id="submit-text" class="glow-button">SUBMIT TEXT</button>
+        </div>
+        
+        <div id="results-screen" class="hidden player-screen">
+            <h2>ROUND RESULTS</h2>
+            <div class="hidden-text" id="original-text"></div>
+            <div class="hidden-text" id="hidden-text"></div>
+            <div id="player2-answer" class="arcade-text"></div>
+            <div class="accuracy" id="accuracy"></div>
+            <div id="next-round" class="hidden">
+                <button id="next-round-btn" class="glow-button">NEXT ROUND</button>
+            </div>
+        </div>
+        
+        <div id="game-over" class="hidden player-screen">
+            <h2 class="blink">GAME OVER</h2>
+            <div id="final-result" class="arcade-text"></div>
+            <button id="play-again" class="glow-button">PLAY AGAIN</button>
+        </div>
+
+        <div id="chat-container" class="arcade-chat">
+            <h3>ARCADE CHAT</h3>
+            <div id="chat-messages"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-message" placeholder="TYPE YOUR MESSAGE...">
+                <button id="send-message" class="small-button">SEND</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/sounds.js"></script>
+    <script src="/player1.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+</body>
+</html>

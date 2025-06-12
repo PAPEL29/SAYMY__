@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SAYMY - Arcade Text Game</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <h1 class="blink">SAY<span style="color: var(--neon-pink)">MY</span></h1>
+        <h3>ARCADE TEXT CHALLENGE</h3>
+        
+        <div class="options">
+            <button onclick="window.location.href='/player1'" class="glitch-effect">
+                <span class="glow-text">PLAYER 1</span><br>
+                <small>(TEXT MASTER)</small>
+            </button>
+            
+            <button onclick="window.location.href='/player2'" class="glitch-effect">
+                <span class="glow-text">PLAYER 2</span><br>
+                <small>(WORD HUNTER)</small>
+            </button>
+        </div>
+        
+        <div class="arcade-footer">
+            <div class="credits">© 2023 RETRO ARCADE STUDIOS</div>
+            <div class="high-score">HIGH SCORE: 999999</div>
+        </div>
+    </div>
+
+    <script src="/sounds.js"></script>
+    <script>
+        // Efecto de máquina de escribir
+        const title = document.querySelector('h1');
+        const originalText = title.textContent;
+        title.textContent = '';
+        
+        let i = 0;
+        const typingEffect = setInterval(() => {
+            if (i < originalText.length) {
+                title.textContent += originalText.charAt(i);
+                SoundEffects.play('typing');
+                i++;
+            } else {
+                clearInterval(typingEffect);
+            }
+        }, 150);
+
+        // Efecto de sonido al hacer clic
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', () => {
+                SoundEffects.play('start');
+            });
+        });
+    </script>
+</body>
+</html>
