@@ -12,9 +12,15 @@ document.getElementById('submit-text').addEventListener('click', () => {
 
 socket.on('gameCreated', (data) => {
     gameData = data;
-    document.getElementById('game-id-display').textContent = data.gameId;
-    document.getElementById('waiting-screen').classList.remove('hidden');
+     // Ocultar pantalla de creación
+    document.getElementById('create-screen').classList.add('hidden');
+    
+    // Mostrar selector de palabras y chat
     document.getElementById('text-selection').classList.remove('hidden');
+    document.getElementById('chat-container').classList.remove('hidden');
+    
+    // Configurar chat
+    setupChat();
     
     // Generar QR code
     generateQRCode(data.gameId);
@@ -26,6 +32,44 @@ socket.on('gameCreated', (data) => {
         });
     });
 });
+
+function setupChat() {
+    const chatInput = document.getElementById('chat-message');
+    
+    // Enviar mensaje al hacer clic en el botón
+    document.getElementById('send-message').addEventListener('click', sendMessage);
+    
+    // Enviar mensaje con Enter
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (message && gameId) {
+            socket.emit('sendMessage', gameId, message, playerName);
+            addMessageToChat(playerName, message, true);
+            chatInput.value = '';
+        }
+    }
+}
+
+function addMessageToChat(name, message, isSelf = false) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageElement = document.createElement('div');
+    messageElement.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+    
+    messageElement.innerHTML = `
+        <span class="chat-sender">${name}:</span>
+        <span class="chat-text">${message}</span>
+        <span class="chat-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+    `;
+    
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
 socket.on('gameReady', () => {
     // El juego está listo para comenzar

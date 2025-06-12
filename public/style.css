@@ -469,3 +469,42 @@ body::after {
     color: var(--neon-blue);
     font-size: 14px;
 }
+/* Asegura que el selector de palabras tenga buen espacio */
+#text-selection {
+    margin: 30px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+#text-options {
+    width: 100%;
+    margin: 20px 0;
+    font-size: 16px;
+}
+
+/* Estilo para el selector */
+.arcade-select {
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--neon-blue);
+    color: var(--neon-green);
+    padding: 12px;
+    font-family: 'Press Start 2P', cursive;
+    margin: 10px 0;
+    width: 100%;
+    box-shadow: 
+        inset 0 0 5px var(--neon-blue),
+        0 0 10px var(--neon-blue);
+}
+
+/* Transiciones suaves */
+#create-screen, #text-selection, #chat-container {
+    transition: all 0.5s ease-in-out;
+}
+
+/* Ocultar elementos */
+.hidden {
+    display: none;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
