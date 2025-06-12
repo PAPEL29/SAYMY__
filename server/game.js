@@ -69,10 +69,13 @@ class Game {
         ).join(' ');
     }
 
-    checkAnswer(playerId, answer) {
+       checkAnswer(playerId, answer) {
         const player = this.players.find(p => p.socketId === playerId);
-        if (!player || player.role !== 'player2') return;
-
+        if (!player || player.role !== 'player2') {
+            console.log('Invalid player trying to answer');
+            return;
+        }
+        
         const userWords = answer.split(' ');
         const hiddenWords = this.hiddenText.split(' ');
         const originalWords = this.text.split(' ');
@@ -91,6 +94,11 @@ class Game {
         
         const accuracy = filledCount > 0 ? (correctCount / filledCount) : 0;
         const isSuccessful = accuracy >= 0.7; // 70% de precisión para ganar
+        if (isSuccessful) {
+            this.scores.player2++;
+        } else {
+            this.scores.player1++;
+        }
         
         if (isSuccessful) {
             this.scores.player2++;

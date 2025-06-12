@@ -77,6 +77,7 @@ io.on('connection', (socket) => {
             games[gameId].addPlayer(socket.id, playerName, 'player2');
             socket.join(gameId);
             io.to(gameId).emit('gameReady');
+            io.to(games[gameId].players[0].socketId).emit('playerJoined', playerName);
         } else {
             socket.emit('joinError', 'Juego no encontrado o lleno');
         }
@@ -97,12 +98,12 @@ io.on('connection', (socket) => {
     // Evento de chat - DEBE estar dentro de io.on('connection')
     socket.on('sendMessage', (gameId, message, playerName) => {
         if (games[gameId]) {
-            // Enviar el mensaje a todos en la sala del juego
-            io.to(gameId).emit('newMessage', {
-                playerName: playerName,
-                message: message,
+            const chatMessage = {
+                playerName,
+                message,
                 timestamp: new Date().toLocaleTimeString()
-            });
+            };
+            io.to(gameId).emit('newMessage', chatMessage);
         }
     });
     socket.on('createError', (message) => {

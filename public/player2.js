@@ -1,8 +1,10 @@
 // public/player2.js
 const socket = io();
-let gameId;
 let playerRole = 'player2';
 let qrScanner = null;
+let playerName = '';
+let gameId = '';
+let currentText = '';
 
 document.getElementById('join-btn').addEventListener('click', () => {
     const gameId = document.getElementById('game-id').value.trim();
@@ -15,24 +17,45 @@ document.getElementById('join-btn').addEventListener('click', () => {
     
     socket.emit('joinGame', gameId, playerName);
 });
-
 document.getElementById('submit-answer').addEventListener('click', () => {
-    const answer = document.getElementById('answer-input').value;
+    const answer = document.getElementById('answer-input').value.trim();
+    
+    if (!answer) {
+        alert('Please enter your answer');
+        return;
+    }
+    
+    if (!gameId) {
+        alert('You are not connected to a game');
+        return;
+    }
+    
     socket.emit('submitAnswer', gameId, answer);
+    SoundEffects.play('submit');
 });
+
 
 socket.on('roleAssigned', (role) => {
     playerRole = role;
 });
-
 socket.on('gameReady', () => {
     document.getElementById('join-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('chat-container').classList.remove('hidden');
+    setupChat();
 });
 
 socket.on('textSelected', (data) => {
-    document.getElementById('player1-name').textContent = data.player1;
+    currentText = data.fullText;
     document.getElementById('hidden-text').textContent = data.hiddenText;
+    document.getElementById('player1-name').textContent = data.player1;
+});
+
+socket.on('newMessage', (data) => {
+    if (data.playerName !== playerName) {
+        addMessageToChat(data.playerName, data.message);
+        SoundEffects.play('message');
+    }
 });
 
 socket.on('roundResult', (data) => {
@@ -55,7 +78,7 @@ socket.on('gameOver', (data) => {
     document.getElementById('game-over').classList.remove('hidden');
 });
 // Variables para el chat
-let playerName = '';
+
 
 // Obtener el nombre del jugador (modifica según tu implementación)
 // Para player1:
@@ -165,3 +188,38 @@ socket.on('joinError', (message) => {
     alert(`Error: ${message}`);
     SoundEffects.play('wrong');
 });
+function setupChat() {
+    const chatInput = document.getElementById('chat-message');
+    
+    document.getElementById('send-message').addEventListener('click', sendMessage);
+    
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (message && gameId) {
+            socket.emit('sendMessage', gameId, message, playerName);
+            addMessageToChat(playerName, message, true);
+            chatInput.value = '';
+            SoundEffects.play('message');
+        }
+    }
+}
+function addMessageToChat(name, message, isSelf = false) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageElement = document.createElement('div');
+    messageElement.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+    
+    messageElement.innerHTML = `
+        <span class="chat-sender">${name}:</span>
+        <span class="chat-text">${message}</span>
+        <span class="chat-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+    `;
+    
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
