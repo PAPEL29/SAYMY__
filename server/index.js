@@ -106,6 +106,14 @@ io.on('connection', (socket) => {
             io.to(gameId).emit('newMessage', chatMessage);
         }
     });
+
+    // Manejar tiempo agotado
+socket.on('timeUp', (gameId) => {
+    if (games[gameId]) {
+        games[gameId].handleTimeUp();
+    }
+});
+
     socket.on('createError', (message) => {
     alert(`Error: ${message}`);
     SoundEffects.play('wrong');

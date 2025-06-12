@@ -1,23 +1,32 @@
 // public/player2.js
 const socket = io();
-let playerRole = 'player2';
-let qrScanner = null;
-let playerName = '';
-let gameId = '';
+
 let currentText = '';
+const gameState = {
+    gameId: '',
+    playerName: '',
+    connected: false,
+    timer: null,
+    timeLeft: 60
+};
 
 document.getElementById('join-btn').addEventListener('click', () => {
-    const gameId = document.getElementById('game-id').value.trim();
-    const playerName = document.getElementById('player-name').value.trim();
+    gameState.gameId = document.getElementById('game-id').value.trim().toUpperCase();
+    gameState.playerName = document.getElementById('player-name').value.trim();
     
-    if (!gameId || !playerName) {
-        alert('Please enter both Game ID and your name');
+    if (!gameState.gameId || !gameState.playerName) {
+        alert('Please enter both room code and your name');
         return;
     }
     
-    socket.emit('joinGame', gameId, playerName);
+    socket.emit('joinGame', gameState.gameId, gameState.playerName);
 });
 document.getElementById('submit-answer').addEventListener('click', () => {
+    if (!gameState.connected) {
+        alert('Complete the join process first');
+        return;
+    }
+    
     const answer = document.getElementById('answer-input').value.trim();
     
     if (!answer) {
@@ -25,24 +34,20 @@ document.getElementById('submit-answer').addEventListener('click', () => {
         return;
     }
     
-    if (!gameId) {
-        alert('You are not connected to a game');
-        return;
-    }
-    
-    socket.emit('submitAnswer', gameId, answer);
+    socket.emit('submitAnswer', gameState.gameId, answer);
     SoundEffects.play('submit');
 });
-
 
 socket.on('roleAssigned', (role) => {
     playerRole = role;
 });
 socket.on('gameReady', () => {
+    gameState.connected = true;
     document.getElementById('join-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
     document.getElementById('chat-container').classList.remove('hidden');
     setupChat();
+    startTimer(); // Iniciar temporizador al unirse
 });
 
 socket.on('textSelected', (data) => {
@@ -223,3 +228,45 @@ function addMessageToChat(name, message, isSelf = false) {
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
+// Funciones del temporizador
+function startTimer() {
+    gameState.timeLeft = 60;
+    updateTimerDisplay();
+    
+    gameState.timer = setInterval(() => {
+        gameState.timeLeft--;
+        updateTimerDisplay();
+        
+        if (gameState.timeLeft <= 0) {
+            clearInterval(gameState.timer);
+            handleTimeUp();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const timerElement = document.getElementById('timer');
+    timerElement.textContent = `TIME: ${gameState.timeLeft}`;
+    
+    // Cambiar color cuando el tiempo se acaba
+    if (gameState.timeLeft <= 10) {
+        timerElement.style.color = 'var(--neon-pink)';
+        timerElement.style.animation = 'blink 0.5s infinite';
+    } else {
+        timerElement.style.color = 'var(--neon-blue)';
+        timerElement.style.animation = 'none';
+    }
+}
+
+function handleTimeUp() {
+    alert('Time is up! Your turn has ended.');
+    document.getElementById('submit-answer').disabled = true;
+    socket.emit('timeUp', gameState.gameId);
+}
+
+// Reiniciar temporizador para nueva ronda
+socket.on('prepareNextRound', () => {
+    clearInterval(gameState.timer);
+    document.getElementById('submit-answer').disabled = false;
+    startTimer();
+});

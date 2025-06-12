@@ -128,6 +128,26 @@ class Game {
             });
         }
     }
+     handleTimeUp() {
+        this.scores.player1++; // Punto para jugador 1 por tiempo
+        this.io.to(this.id).emit('roundResult', {
+            winner: 'player1',
+            scores: this.scores,
+            accuracy: 0,
+            reason: 'time'
+        });
+        
+        this.currentRound++;
+        if (this.currentRound < this.maxRounds) {
+            this.io.to(this.id).emit('prepareNextRound');
+        } else {
+            this.io.to(this.id).emit('gameOver', {
+                scores: this.scores,
+                winner: this.scores.player1 > this.scores.player2 ? 'player1' : 
+                       this.scores.player2 > this.scores.player1 ? 'player2' : 'draw'
+            });
+        }
+    }
 }
 
 module.exports = Game;
