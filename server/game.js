@@ -8,9 +8,16 @@ class Game {
         this.text = '';
         this.hiddenText = '';
         this.currentRound = 0;
+        this.roundsPlayed = 0;
+        this.totalRounds = 5; // 5 rondas por bando
         this.maxRounds = 3;
         this.scores = { player1: 0, player2: 0 };
         this.chatHistory = [];
+        this.currentRound = 1;
+        this.currentRoles = {
+            player1: 'selector',
+            player2: 'guesser'
+        };
     }
     addChatMessage(playerName, message) {
         const chatMessage = {
@@ -70,6 +77,15 @@ class Game {
     }
 
        checkAnswer(playerId, answer) {
+          this.roundsPlayed++;
+        
+        if (this.roundsPlayed >= this.totalRounds) {
+            this.switchRoles();
+        } else {
+            this.currentRound++;
+            this.io.to(this.id).emit('prepareNextRound');
+        }
+
         const player = this.players.find(p => p.socketId === playerId);
         if (!player || player.role !== 'player2') {
             console.log('Invalid player trying to answer');
@@ -127,8 +143,40 @@ class Game {
                        this.scores.player2 > this.scores.player1 ? 'player2' : 'draw'
             });
         }
+
+        
     }
+
+    switchRoles() {
+        // Intercambiar roles
+        const newRoles = {
+            player1: this.currentRoles.player2,
+            player2: this.currentRoles.player1
+        };
+        
+        this.currentRoles = newRoles;
+        this.roundsPlayed = 0;
+        this.currentRound = 1;
+
+        // Notificar a los jugadores
+        this.io.to(this.id).emit('rolesSwitched', {
+            newRoles: this.currentRoles,
+            scores: this.scores
+        });
+    }
+
      handleTimeUp() {
+
+        this.roundsPlayed++;
+        if (this.roundsPlayed >= this.totalRounds) {
+            this.switchRoles();
+        } else {
+            this.currentRound++;
+            this.io.to(this.id).emit('prepareNextRound');
+        }
+    
+
+
         this.scores.player1++; // Punto para jugador 1 por tiempo
         this.io.to(this.id).emit('roundResult', {
             winner: 'player1',
@@ -147,6 +195,7 @@ class Game {
                        this.scores.player2 > this.scores.player1 ? 'player2' : 'draw'
             });
         }
+        
     }
 }
 

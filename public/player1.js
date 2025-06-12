@@ -219,3 +219,41 @@ document.getElementById('create-game-btn').addEventListener('click', () => {
     
     socket.emit('createGame', gameId, playerName);
 });
+// Manejar cambio de roles
+socket.on('rolesSwitched', (data) => {
+    // Mostrar pantalla de transición
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('transition-screen').classList.remove('hidden');
+    
+    // Mostrar resumen
+    document.getElementById('round-summary').innerHTML = `
+        <h3>ROUNDS COMPLETED!</h3>
+        <p>Player 1 (${data.newRoles.player1 === 'selector' ? 'Selector' : 'Guesser'}): ${data.scores.player1} points</p>
+        <p>Player 2 (${data.newRoles.player2 === 'selector' ? 'Selector' : 'Guesser'}): ${data.scores.player2} points</p>
+        <p>Now switching roles...</p>
+    `;
+    
+    // Continuar después de 5 segundos
+    setTimeout(() => {
+        document.getElementById('transition-screen').classList.add('hidden');
+        setupForNewRole(data.newRoles);
+    }, 5000);
+});
+
+function setupForNewRole(roles) {
+    const playerRole = roles[socket.id === gameState.player1Id ? 'player1' : 'player2'];
+    
+    if (playerRole === 'selector') {
+        // Mostrar interfaz de selector
+        document.getElementById('text-selection').classList.remove('hidden');
+        document.getElementById('guessing-interface').classList.add('hidden');
+    } else {
+        // Mostrar interfaz de adivinador
+        document.getElementById('text-selection').classList.add('hidden');
+        document.getElementById('guessing-interface').classList.remove('hidden');
+    }
+    
+    // Reiniciar temporizador
+    clearInterval(gameState.timer);
+    startTimer();
+}
