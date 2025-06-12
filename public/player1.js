@@ -1,4 +1,3 @@
-// public/player1.js
 const socket = io();
 let playerRole = 'player1';
 let gameData = {};
@@ -10,250 +9,91 @@ document.getElementById('submit-text').addEventListener('click', () => {
     socket.emit('selectText', gameId, text);
 });
 
-socket.on('gameCreated', (data) => {
-    gameData = data;
-     // Ocultar pantalla de creación
-    document.getElementById('create-screen').classList.add('hidden');
-    
-    // Mostrar selector de palabras y chat
-    document.getElementById('text-selection').classList.remove('hidden');
-    document.getElementById('chat-container').classList.remove('hidden');
-    
-    // Configurar chat
-    setupChat();
-    
-    // Generar QR code
-    generateQRCode(data.gameId);
-    
-    // Copiar ID al portapapeles
-    document.getElementById('copy-id-btn').addEventListener('click', () => {
-        navigator.clipboard.writeText(data.gameId).then(() => {
-            alert('Game ID copied to clipboard!');
-        });
+socket.on('gameCreated', (id) => {
+    gameId = id;
+    console.log('ID del juego:', gameId);
+
+    const qrCodeUrl = `http://localhost:3000/player2.html?gameId=${gameId}`;
+    new QRCode(document.getElementById('qrcode'), {
+        text: qrCodeUrl,
+        width: 128,
+        height: 128
     });
+
+    document.getElementById('player1-section').style.display = 'block';
+    document.getElementById('waiting-room').style.display = 'none';
+    document.getElementById('role').textContent = 'Player 1';
+});
+
+socket.on('updateGame', (data) => {
+    gameData = data;
+    console.log('Datos del juego actualizados:', gameData);
+});
+
+socket.on('message', (data) => {
+    console.log('Mensaje del servidor:', data);
 });
 
 function setupChat() {
-    const chatInput = document.getElementById('chat-message');
-    
-    // Enviar mensaje al hacer clic en el botón
-    document.getElementById('send-message').addEventListener('click', sendMessage);
-    
-    // Enviar mensaje con Enter
-    chatInput.addEventListener('keypress', (e) => {
+    document.getElementById('send-chat').addEventListener('click', sendMessage);
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             sendMessage();
         }
     });
-    
-    function sendMessage() {
-        const message = chatInput.value.trim();
-        if (message && gameId) {
-            socket.emit('sendMessage', gameId, message, playerName);
-            addMessageToChat(playerName, message, true);
-            chatInput.value = '';
-        }
-    }
 }
 
-function addMessageToChat(name, message, isSelf = false) {
-    const chatMessages = document.getElementById('chat-messages');
+function addMessageToChat(message) {
+    const chatBox = document.getElementById('chat-box');
     const messageElement = document.createElement('div');
-    messageElement.className = `chat-message ${isSelf ? 'self' : 'other'}`;
-    
-    messageElement.innerHTML = `
-        <span class="chat-sender">${name}:</span>
-        <span class="chat-text">${message}</span>
-        <span class="chat-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-    `;
-    
-    chatMessages.appendChild(messageElement);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    messageElement.textContent = message;
+    chatBox.appendChild(messageElement);
 }
 
-socket.on('gameReady', () => {
-    // El juego está listo para comenzar
-});
-
-socket.on('textSelected', (data) => {
-    document.getElementById('original-text').textContent = data.fullText;
-    document.getElementById('hidden-text').textContent = data.hiddenText;
-    document.getElementById('results-screen').classList.remove('hidden');
-});
-
-socket.on('roundResult', (data) => {
-    document.getElementById('scores').textContent = 
-        `Jugador 1: ${data.scores.player1} - Jugador 2: ${data.scores.player2}`;
-    document.getElementById('accuracy').textContent = data.accuracy;
-    
-    if (data.winner === 'player1') {
-        // Mostrar que ganó el punto
-    } else {
-        // Mostrar que el jugador 2 ganó el punto
-    }
-    
-    document.getElementById('next-round').classList.remove('hidden');
-});
-
-socket.on('gameOver', (data) => {
-    document.getElementById('final-result').textContent = 
-        `Jugador 1: ${data.scores.player1} - Jugador 2: ${data.scores.player2}`;
-    document.getElementById('game-over').classList.remove('hidden');
-});
-
-
-// Obtener el nombre del jugador (modifica según tu implementación)
-// Para player1:
-playerName = document.getElementById('player-name')?.value || 'Jugador 1';
-// Para player2:
-playerName = document.getElementById('player-name')?.value || 'Jugador 2';
-
-// Enviar mensaje
-// Chat mejorado
-const chatMessages = document.getElementById('chat-messages');
-const chatInput = document.getElementById('chat-message');
-const toggleChatBtn = document.getElementById('toggle-chat');
-
-let isChatOpen = true;
-
-// Alternar visibilidad del chat
-toggleChatBtn.addEventListener('click', () => {
-    isChatOpen = !isChatOpen;
-    document.querySelector('.chat-body').style.display = isChatOpen ? 'block' : 'none';
-    toggleChatBtn.textContent = isChatOpen ? '▼' : '▲';
-});
-
-// Enviar mensaje con Enter
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendMessage();
-    }
-});
 function sendMessage() {
-    const message = chatInput.value.trim();
-    if (message && gameId) {
-        socket.emit('sendMessage', gameId, message, playerName);
-        addMessageToChat(playerName, message, true);
-        chatInput.value = '';
+    const messageInput = document.getElementById('chat-input');
+    const message = messageInput.value.trim();
+    if (message !== '') {
+        socket.emit('sendMessage', gameId, playerName, message);
+        messageInput.value = '';
     }
 }
 
-function addMessageToChat(name, message, isSelf = false) {
-    const messageElement = document.createElement('div');
-    messageElement.className = `chat-message ${isSelf ? 'self' : 'other'}`;
-    
-    messageElement.innerHTML = `
-        <span class="chat-sender">${name}:</span>
-        <span class="chat-text">${message}</span>
-        <span class="chat-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-    `;
-    
-    chatMessages.appendChild(messageElement);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-// Escuchar mensajes del servidor
 socket.on('newMessage', (data) => {
-    if (data.playerName !== playerName) {
-        addMessageToChat(data.playerName, data.message);
-        SoundEffects.play('message');
-    }
+    addMessageToChat(`${data.playerName}: ${data.message}`);
 });
 
-
-socket.on('playerJoined', (playerName) => {
-    document.getElementById('connection-status').textContent = `${playerName} has joined the game!`;
-    SoundEffects.play('join');
+socket.on('playerName', (name) => {
+    playerName = name;
+    document.getElementById('player-name').textContent = `Tu nombre: ${playerName}`;
+    setupChat();
 });
 
-// En el jugador
-document.getElementById('chat-message').addEventListener('input', () => {
-    socket.emit('typing', gameId, playerName);
+socket.on('startNewRound', (data) => {
+    gameData = data;
+    console.log('Nueva ronda:', gameData);
 });
 
-// En el servidor
-socket.on('typing', (gameId, playerName) => {
-    socket.to(gameId).emit('userTyping', playerName);
-});
+socket.on('showOptions', (options) => {
+    const optionsContainer = document.getElementById('options-container');
+    optionsContainer.innerHTML = '';
 
-// En el otro jugador
-let typingTimeout;
-socket.on('userTyping', (playerName) => {
-    const typingIndicator = document.getElementById('typing-indicator');
-    typingIndicator.textContent = `${playerName} está escribiendo...`;
-    
-    clearTimeout(typingTimeout);
-    typingTimeout = setTimeout(() => {
-        typingIndicator.textContent = '';
-    }, 2000);
-});
-function generateQRCode(gameId) {
-    const qrCodeElement = document.getElementById('qr-code');
-    qrCodeElement.innerHTML = '';
-    
-    // Usar la librería qrcode.js (debes incluirla en tu HTML)
-    if (typeof QRCode !== 'undefined') {
-        new QRCode(qrCodeElement, {
-            text: gameId,
-            width: 150,
-            height: 150,
-            colorDark: "#05d9e8",
-            colorLight: "transparent",
-            correctLevel: QRCode.CorrectLevel.H
+    options.forEach(option => {
+        const button = document.createElement('button');
+        button.textContent = option;
+        button.className = 'option-button';
+        button.addEventListener('click', () => {
+            socket.emit('selectOption', gameId, playerRole, option);
         });
-    }
-}
-// Crear sala con código personalizado
-document.getElementById('create-game-btn').addEventListener('click', () => {
-    playerName = document.getElementById('player1-name').value.trim();
-    gameId = document.getElementById('custom-game-id').value.trim().toUpperCase();
-    
-    if (!playerName || !gameId) {
-        alert('Please enter both your name and a room code');
-        return;
-    }
-    
-    if (!/^[A-Z0-9]{4,6}$/.test(gameId)) {
-        alert('Room code must be 4-6 letters/numbers');
-        return;
-    }
-    
-    socket.emit('createGame', gameId, playerName);
-});
-// Manejar cambio de roles
-socket.on('rolesSwitched', (data) => {
-    // Mostrar pantalla de transición
-    document.getElementById('game-screen').classList.add('hidden');
-    document.getElementById('transition-screen').classList.remove('hidden');
-    
-    // Mostrar resumen
-    document.getElementById('round-summary').innerHTML = `
-        <h3>ROUNDS COMPLETED!</h3>
-        <p>Player 1 (${data.newRoles.player1 === 'selector' ? 'Selector' : 'Guesser'}): ${data.scores.player1} points</p>
-        <p>Player 2 (${data.newRoles.player2 === 'selector' ? 'Selector' : 'Guesser'}): ${data.scores.player2} points</p>
-        <p>Now switching roles...</p>
-    `;
-    
-    // Continuar después de 5 segundos
-    setTimeout(() => {
-        document.getElementById('transition-screen').classList.add('hidden');
-        setupForNewRole(data.newRoles);
-    }, 5000);
+        optionsContainer.appendChild(button);
+    });
 });
 
-function setupForNewRole(roles) {
-    const playerRole = roles[socket.id === gameState.player1Id ? 'player1' : 'player2'];
-    
-    if (playerRole === 'selector') {
-        // Mostrar interfaz de selector
-        document.getElementById('text-selection').classList.remove('hidden');
-        document.getElementById('guessing-interface').classList.add('hidden');
-    } else {
-        // Mostrar interfaz de adivinador
-        document.getElementById('text-selection').classList.add('hidden');
-        document.getElementById('guessing-interface').classList.remove('hidden');
-    }
-    
-    // Reiniciar temporizador
-    clearInterval(gameState.timer);
-    startTimer();
-}
+socket.on('roleChanged', (newRole) => {
+    playerRole = newRole;
+    document.getElementById('role').textContent = `Rol: ${playerRole}`;
+});
+
+socket.on('newRolesAssigned', (data) => {
+    setupForNewRole(data.newRoles);
+});
