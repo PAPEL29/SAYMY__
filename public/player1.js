@@ -1,8 +1,9 @@
 // public/player1.js
 const socket = io();
-let gameId;
 let playerRole = 'player1';
 let gameData = {};
+let gameId = '';
+let playerName = '';
 
 document.getElementById('submit-text').addEventListener('click', () => {
     const text = document.getElementById('text-options').value;
@@ -55,8 +56,7 @@ socket.on('gameOver', (data) => {
         `Jugador 1: ${data.scores.player1} - Jugador 2: ${data.scores.player2}`;
     document.getElementById('game-over').classList.remove('hidden');
 });
-// Variables para el chat
-let playerName = '';
+
 
 // Obtener el nombre del jugador (modifica según tu implementación)
 // Para player1:
@@ -65,33 +65,53 @@ playerName = document.getElementById('player-name')?.value || 'Jugador 1';
 playerName = document.getElementById('player-name')?.value || 'Jugador 2';
 
 // Enviar mensaje
-document.getElementById('send-message')?.addEventListener('click', () => {
-    const messageInput = document.getElementById('chat-message');
-    const message = messageInput.value.trim();
-    
+// Chat mejorado
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-message');
+const toggleChatBtn = document.getElementById('toggle-chat');
+
+let isChatOpen = true;
+
+// Alternar visibilidad del chat
+toggleChatBtn.addEventListener('click', () => {
+    isChatOpen = !isChatOpen;
+    document.querySelector('.chat-body').style.display = isChatOpen ? 'block' : 'none';
+    toggleChatBtn.textContent = isChatOpen ? '▼' : '▲';
+});
+
+// Enviar mensaje con Enter
+chatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+function sendMessage() {
+    const message = chatInput.value.trim();
     if (message && gameId) {
         socket.emit('sendMessage', gameId, message, playerName);
-        messageInput.value = '';
+        addMessageToChat(playerName, message, true);
+        chatInput.value = '';
     }
-});
+}
 
-// Permitir enviar con Enter
-document.getElementById('chat-message')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('send-message').click();
-    }
-});
-
-// Recibir mensajes
-socket.on('newMessage', (data) => {
-    const chatMessages = document.getElementById('chat-messages');
+function addMessageToChat(name, message, isSelf = false) {
     const messageElement = document.createElement('div');
-    messageElement.innerHTML = `<strong>${data.playerName}:</strong> ${data.message} <small>(${data.timestamp})</small>`;
+    messageElement.className = `chat-message ${isSelf ? 'self' : 'other'}`;
+    
+    messageElement.innerHTML = `
+        <span class="chat-sender">${name}:</span>
+        <span class="chat-text">${message}</span>
+        <span class="chat-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+    `;
+    
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    if (document.hidden) {
-        const audio = new Audio('/notification.mp3');
-        audio.play().catch(e => console.log('No se pudo reproducir sonido:', e));
+}
+// Escuchar mensajes del servidor
+socket.on('newMessage', (data) => {
+    if (data.playerName !== playerName) {
+        addMessageToChat(data.playerName, data.message);
+        SoundEffects.play('message');
     }
 });
 
@@ -138,3 +158,20 @@ function generateQRCode(gameId) {
         });
     }
 }
+// Crear sala con código personalizado
+document.getElementById('create-game-btn').addEventListener('click', () => {
+    playerName = document.getElementById('player1-name').value.trim();
+    gameId = document.getElementById('custom-game-id').value.trim().toUpperCase();
+    
+    if (!playerName || !gameId) {
+        alert('Please enter both your name and a room code');
+        return;
+    }
+    
+    if (!/^[A-Z0-9]{4,6}$/.test(gameId)) {
+        alert('Room code must be 4-6 letters/numbers');
+        return;
+    }
+    
+    socket.emit('createGame', gameId, playerName);
+});

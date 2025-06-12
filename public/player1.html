@@ -28,6 +28,20 @@
     <div class="qr-code-container" id="qr-code"></div>
     <p id="connection-status">No players connected yet</p>
 </div>
+    <div id="create-screen">
+    <h2>CREATE GAME</h2>
+    <div class="form-group">
+        <label for="player1-name">YOUR NAME:</label>
+        <input type="text" id="player1-name" class="arcade-input" placeholder="ENTER YOUR NAME">
+    </div>
+    <div class="form-group">
+        <label for="custom-game-id">ROOM CODE (4-6 letters/numbers):</label>
+        <input type="text" id="custom-game-id" class="arcade-input" placeholder="ENTER ROOM CODE" maxlength="6">
+    </div>
+    <button id="create-game-btn" class="glow-button">CREATE ROOM</button>
+</div>
+
+
         
         <div id="text-selection" class="hidden">
             <h2>SELECT YOUR TEXT:</h2>
@@ -57,14 +71,18 @@
         </div>
 
         <div id="chat-container" class="arcade-chat">
-            <h3>ARCADE CHAT</h3>
-            <div id="chat-messages"></div>
-            <div class="chat-input">
-                <input type="text" id="chat-message" placeholder="TYPE YOUR MESSAGE...">
-                <button id="send-message" class="small-button">SEND</button>
-            </div>
+    <div class="chat-header">
+        <h3>ARCADE CHAT</h3>
+        <div class="chat-controls">
+            <button id="toggle-chat" class="small-button">▲</button>
         </div>
     </div>
+    <div id="chat-messages" class="chat-body"></div>
+    <div class="chat-footer">
+        <input type="text" id="chat-message" placeholder="TYPE YOUR MESSAGE..." class="chat-input">
+        <button id="send-message" class="small-button">SEND</button>
+    </div>
+</div>
     
     <script src="/socket.io/socket.io.js"></script>
     <script src="/sounds.js"></script>

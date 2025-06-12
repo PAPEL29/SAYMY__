@@ -55,16 +55,20 @@ io.on('connection', (socket) => {
     console.log('Nuevo usuario conectado:', socket.id);
 
     // Mover todos los eventos de socket dentro de este bloque
-    socket.on('createGame', (playerName) => {
-    const gameId = generateGameId();
-    games[gameId] = new Game(gameId, io);
-    games[gameId].addPlayer(socket.id, playerName, 'player1');
-    socket.join(gameId);
+    socket.on('createGame', (customGameId, playerName) => {
+    // Verificar si el ID ya existe
+    if (games[customGameId]) {
+        socket.emit('createError', 'Room code already in use');
+        return;
+    }
     
-    // Devolver tanto el gameId como el socket.id del jugador 1
-    socket.emit('gameCreated', { 
-        gameId: gameId,
-        playerId: socket.id 
+    games[customGameId] = new Game(customGameId, io);
+    games[customGameId].addPlayer(socket.id, playerName, 'player1');
+    socket.join(customGameId);
+    
+    socket.emit('gameCreated', {
+        gameId: customGameId,
+        playerId: socket.id
     });
 });
 
@@ -101,6 +105,10 @@ io.on('connection', (socket) => {
             });
         }
     });
+    socket.on('createError', (message) => {
+    alert(`Error: ${message}`);
+    SoundEffects.play('wrong');
+});
 
     socket.on('disconnect', () => {
         console.log('Usuario desconectado:', socket.id);

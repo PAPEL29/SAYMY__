@@ -161,3 +161,7 @@ document.getElementById('scan-qr-btn').addEventListener('click', () => {
         alert('QR Scanner not available');
     }
 });
+socket.on('joinError', (message) => {
+    alert(`Error: ${message}`);
+    SoundEffects.play('wrong');
+});
