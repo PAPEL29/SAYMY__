@@ -257,3 +257,34 @@ function setupForNewRole(roles) {
     clearInterval(gameState.timer);
     startTimer();
 }
+// Manejar nueva ronda
+socket.on('newRound', (data) => {
+    // Actualizar marcador
+    document.getElementById('player1-score').textContent = data.scores.player1;
+    document.getElementById('player2-score').textContent = data.scores.player2;
+    
+    // Mostrar nueva frase para selección
+    if (gameState.role === 'selector') {
+        document.getElementById('text-selection').classList.remove('hidden');
+        document.getElementById('text-options').value = data.fullText;
+    }
+    
+    // Actualizar contador de rondas
+    document.getElementById('current-round').textContent = data.round;
+    gameState.currentRound = data.round;
+});
+// Manejar fin del juego
+socket.on('gameOver', (data) => {
+    clearInterval(gameState.timer);
+    
+    // Mostrar pantalla final
+    document.getElementById('final-score-1').textContent = data.scores.player1;
+    document.getElementById('final-score-2').textContent = data.scores.player2;
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('restart-screen').classList.remove('hidden');
+    
+    // Configurar botón de reinicio
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        location.reload(); // Recargar la página para reiniciar
+    });
+});

@@ -18,6 +18,14 @@ class Game {
             player1: 'selector',
             player2: 'guesser'
         };
+        this.phrases = [
+            "The quick brown fox jumps over the lazy dog",
+            "To be or not to be that is the question",
+            "May the Force be with you",
+            "Elementary my dear Watson",
+            "Houston we have a problem"
+        ];
+        this.usedPhrases = [];
     }
     addChatMessage(playerName, message) {
         const chatMessage = {
@@ -33,6 +41,25 @@ class Game {
         }
         
         return chatMessage;
+    }
+
+    getRandomPhrase() {
+        // Obtener frases no usadas
+        const availablePhrases = this.phrases.filter(phrase => 
+            !this.usedPhrases.includes(phrase));
+        
+        // Si todas las frases fueron usadas, reiniciar
+        if (availablePhrases.length === 0) {
+            this.usedPhrases = [];
+            return this.getRandomPhrase();
+        }
+        
+        // Seleccionar frase aleatoria
+        const randomIndex = Math.floor(Math.random() * availablePhrases.length);
+        const selectedPhrase = availablePhrases[randomIndex];
+        this.usedPhrases.push(selectedPhrase);
+        
+        return selectedPhrase;
     }
 
     addPlayer(socketId, name, role) {
@@ -143,9 +170,37 @@ class Game {
                        this.scores.player2 > this.scores.player1 ? 'player2' : 'draw'
             });
         }
+        if (isSuccessful) {
+            this.scores.player2++;
+        } else {
+            this.scores.player1++;
+        }
+
+        // Preparar nueva ronda
+        this.prepareNextRound();
 
         
     }
+
+    prepareNextRound() {
+        this.currentRound++;
+        
+        if (this.currentRound <= this.maxRounds) {
+            const newPhrase = this.getRandomPhrase();
+            const hiddenPhrase = this.generateHiddenText(newPhrase);
+            
+            this.io.to(this.id).emit('newRound', {
+                round: this.currentRound,
+                fullText: newPhrase,
+                hiddenText: hiddenPhrase,
+                scores: this.scores
+            });
+        } else {
+            this.switchRoles();
+        }
+    }
+
+
 
     switchRoles() {
         // Intercambiar roles
@@ -165,7 +220,26 @@ class Game {
         });
     }
 
-     handleTimeUp() {
+
+    generateHiddenText(text) {
+    const words = text.split(' ');
+    const totalWords = words.length;
+    const wordsToHide = Math.floor(totalWords * 0.3); // Ocultar 30%
+    
+    const hiddenIndices = new Set();
+    while (hiddenIndices.size < wordsToHide) {
+        const randomIndex = Math.floor(Math.random() * totalWords);
+        if (words[randomIndex].length > 3) {
+            hiddenIndices.add(randomIndex);
+        }
+    }
+    
+    return words.map((word, index) => 
+        hiddenIndices.has(index) ? '_____' : word
+    ).join(' ');
+}
+
+    handleTimeUp() {
 
         this.roundsPlayed++;
         if (this.roundsPlayed >= this.totalRounds) {

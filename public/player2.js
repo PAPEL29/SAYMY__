@@ -308,3 +308,39 @@ function setupForNewRole(roles) {
     clearInterval(gameState.timer);
     startTimer();
 }
+// Manejar nueva ronda
+socket.on('newRound', (data) => {
+    // Actualizar interfaz
+    document.getElementById('hidden-text').textContent = data.hiddenText;
+    document.getElementById('answer-input').value = '';
+    
+    // Reiniciar temporizador
+    clearInterval(gameState.timer);
+    gameState.timeLeft = 60;
+    updateTimerDisplay();
+    startTimer();
+    
+    // Actualizar marcador
+    document.getElementById('player1-score').textContent = data.scores.player1;
+    document.getElementById('player2-score').textContent = data.scores.player2;
+    
+    // Mostrar notificación
+    if (gameState.role === 'guesser') {
+        alert(`New phrase ready! Round ${data.round} of ${gameState.maxRounds}`);
+    }
+});
+// Manejar fin del juego
+socket.on('gameOver', (data) => {
+    clearInterval(gameState.timer);
+    
+    // Mostrar pantalla final
+    document.getElementById('final-score-1').textContent = data.scores.player1;
+    document.getElementById('final-score-2').textContent = data.scores.player2;
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('restart-screen').classList.remove('hidden');
+    
+    // Configurar botón de reinicio
+    document.getElementById('restart-btn').addEventListener('click', () => {
+        location.reload(); // Recargar la página para reiniciar
+    });
+});
