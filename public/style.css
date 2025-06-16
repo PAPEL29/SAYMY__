@@ -503,7 +503,7 @@ body::after {
 
 /* Ocultar elementos */
 .hidden {
-    display: none;
+   /* display: none; */
     opacity: 0;
     height: 0;
     overflow: hidden;
