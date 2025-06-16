@@ -288,3 +288,10 @@ socket.on('gameOver', (data) => {
         location.reload(); // Recargar la página para reiniciar
     });
 });
+document.querySelectorAll('div').forEach(div => {
+    if (div.offsetWidth === window.innerWidth && 
+        div.offsetHeight === window.innerHeight) {
+        console.log('Div que cubre toda la pantalla:', div);
+        div.style.display = 'none'; // Prueba temporal
+    }
+});
