@@ -132,3 +132,11 @@ function generateGameId() {
 server.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+// Intenta esto en la consola
+document.querySelectorAll('div').forEach(div => {
+    if (div.offsetWidth === window.innerWidth && 
+        div.offsetHeight === window.innerHeight) {
+        console.log('Div que cubre toda la pantalla:', div);
+        div.style.display = 'none'; // Prueba temporal
+    }
+});

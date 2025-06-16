@@ -1,4 +1,8 @@
 /* Estilo Arcade Retro */
+* {
+    pointer-events: auto !important;
+}
+
 :root {
   --neon-pink: #ff2a6d;
   --neon-blue: #05d9e8;
@@ -503,7 +507,7 @@ body::after {
 
 /* Ocultar elementos */
 .hidden {
-   /* display: none; */
+    display: none; 
     opacity: 0;
     height: 0;
     overflow: hidden;
